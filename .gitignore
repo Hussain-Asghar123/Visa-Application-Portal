@@ -1,0 +1,41 @@
+# Environment and Config files
+private/config.php
+private/install.key
+private/install.lock
+.env
+*.env.*
+
+# Uploaded storage files (keep directory structure and index.html/.htaccess)
+private/storage/biometrics/*
+!private/storage/biometrics/.htaccess
+!private/storage/biometrics/index.html
+private/storage/documents/*
+!private/storage/documents/.htaccess
+!private/storage/documents/index.html
+private/storage/lmia/*
+!private/storage/lmia/.htaccess
+!private/storage/lmia/index.html
+private/storage/offers/*
+!private/storage/offers/.htaccess
+!private/storage/offers/index.html
+private/storage/receipts/*
+!private/storage/receipts/.htaccess
+!private/storage/receipts/index.html
+
+# Logs
+private/logs/*
+!private/logs/.htaccess
+!private/logs/index.html
+*.log
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.old
+*.swp
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

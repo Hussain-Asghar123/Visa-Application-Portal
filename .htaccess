@@ -1,0 +1,49 @@
+# Visa Application Portal – Apache configuration (kept under 10 KB for free hosts)
+Options -Indexes
+DirectoryIndex index.php
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- HTTPS redirect: uncomment the next two lines AFTER your SSL certificate is active ---
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Block unsafe HTTP methods and well-known hacking tools.
+  RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|DEBUG|CONNECT) [NC]
+  RewriteRule ^ - [F,L]
+  RewriteCond %{HTTP_USER_AGENT} (sqlmap|nikto|nmap|masscan|acunetix|nessus|openvas|wpscan|dirbuster|gobuster|ffuf|zgrab|nuclei|havij|w3af|commix|netsparker) [NC]
+  RewriteRule ^ - [F,L]
+  # Block common attack payloads in the query string.
+  RewriteCond %{QUERY_STRING} (\.\./|%2e%2e%2f|/etc/passwd|<script|%3Cscript|union(.*)select|base64_decode|php://|%00) [NC]
+  RewriteRule ^ - [F,L]
+
+  # Block internal folders even if their own .htaccess is ignored.
+  RewriteRule ^(private|includes|database|docs|tests|deploy)(/|$) - [F,L]
+
+  # Block hidden files (except .well-known used for SSL validation).
+  RewriteRule (^|/)\.(?!well-known/) - [F,L]
+</IfModule>
+
+# Never serve source, backup, SQL, log or config-like files directly.
+<FilesMatch "(?i)\.(sql|md|log|ini|bak|old|orig|swp|dist|sample|lock|env|sh|zip|key|tmp)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "same-origin"
+  Header always unset X-Powered-By
+  Header unset X-Powered-By
+</IfModule>
+
+ErrorDocument 403 "403 Forbidden"
+ErrorDocument 404 "404 Not Found"
