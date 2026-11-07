@@ -33,6 +33,35 @@ function load_config(): void
             return;
         }
     }
+
+    // Allow configuration directly from Environment Variables (for cloud/Vercel/Docker deployment)
+    if (getenv('DB_HOST') && getenv('DB_NAME')) {
+        $storageDir = getenv('STORAGE_DIR') ?: (!@is_writable(APP_ROOT . '/private/storage') && is_dir('/tmp') ? '/tmp/storage' : '');
+        $logsDir = getenv('LOGS_DIR') ?: (!@is_writable(APP_ROOT . '/private/logs') && is_dir('/tmp') ? '/tmp/logs' : '');
+        $GLOBALS['__vap_config'] = config_merge(config_defaults(), [
+            'app' => [
+                'name' => getenv('APP_NAME') ?: 'Visa Application Portal',
+                'url'  => getenv('APP_URL') ?: '',
+                'key'  => getenv('APP_KEY') ?: '',
+                'timezone' => getenv('APP_TIMEZONE') ?: 'UTC',
+                'debug' => filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN),
+                'force_https' => filter_var(getenv('FORCE_HTTPS') ?: true, FILTER_VALIDATE_BOOLEAN),
+            ],
+            'db' => [
+                'host' => (string) getenv('DB_HOST'),
+                'port' => (int) (getenv('DB_PORT') ?: 3306),
+                'name' => (string) getenv('DB_NAME'),
+                'user' => (string) getenv('DB_USER'),
+                'pass' => (string) (getenv('DB_PASS') !== false ? getenv('DB_PASS') : ''),
+            ],
+            'paths' => [
+                'storage' => $storageDir,
+                'logs'    => $logsDir,
+            ],
+        ]);
+        return;
+    }
+
     $GLOBALS['__vap_config'] = [];
     $GLOBALS['__vap_config_file'] = null;
     if (defined('VAP_INSTALLER')) {
